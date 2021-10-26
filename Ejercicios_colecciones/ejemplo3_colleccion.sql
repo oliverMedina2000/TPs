@@ -1,0 +1,32 @@
+ DECLARE
+  CURSOR C_VENTAS IS SELECT * FROM B_VENTAS;
+  CURSOR C_ART(P_VENTA NUMBER) IS
+      SELECT DISTINCT V.ID_ARTICULO, A.PRECIO
+      FROM   B_DETALLE_VENTAS V JOIN B_ARTICULOS A ON A.ID = V.ID_ARTICULO 
+      WHERE V.ID_VENTA = P_VENTA;
+  V_PROD tabla_producto := tabla_producto(); -- CONSTRUCTOR
+  ind  number;
+BEGIN
+  FOR REG IN C_VENTAS LOOP
+      ind := 1;
+      V_PROD.DELETE; --LIMPIA LA TABLA (COLECCIÓN)
+      FOR REG2 IN C_ART(REG.ID) LOOP
+          v_PROD.EXTEND; --INICIALIZA CADA ELEMENTO
+          V_PROD(ind) := tipo_producto(REG2.ID_ARTICULO, REG2.PRECIO);
+          ind := ind + 1;
+      END LOOP;
+      INSERT INTO VENTAS VALUES(REG.ID, REG.FECHA, V_PROD);
+   END LOOP;
+   COMMIT;
+END;
+/* Ciclo de lectura */
+DECLARE
+  CURSOR C_VENTAS IS 
+   SELECT v.no_venta, v.fecha, c.id_producto, c.precio
+   FROM ventas v, TABLE(v.producto) c;
+BEGIN
+   FOR REG IN C_VENTAS LOOP
+       DBMS_OUTPUT.PUT_LINE(REG.NO_VENTA || ' - ' || REG.ID_PRODUCTO || '- '|| REG.PRECIO );
+   END LOOP;
+END;
+/
